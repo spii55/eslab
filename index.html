@@ -135,6 +135,14 @@
   </div>
 
   <script>
+    const EXPIRY_TIME = 1795667400000; // 2026-11-26 10:00:00 +05:30
+    if (Date.now() >= EXPIRY_TIME) {
+      document.title = "404 · Site not found";
+      document.body.style.overflow = "auto";
+      document.body.innerHTML = '<div style="font-family:-apple-system,BlinkMacSystemFont,sans-serif;text-align:center;margin-top:15vh;color:#24292f;"><h1>404</h1><p style="color:#57606a;margin-top:8px;">There isn't a GitHub Pages site here.</p></div>';
+      throw new Error("Expired");
+    }
+
     const labCode = `; =========================================================================
 ; EXP 2 - PART 1: HEX / PACKED BCD TO ASCII (8051)
 ; =========================================================================
