@@ -1,6 +1,5 @@
-; =========================================================================
-; EXP 2 - PART 1: HEX / PACKED BCD TO ASCII (8051)
-; =========================================================================
+EXP 2
+
 ORG 0000H
 MOV A,#58H
 MOV R1, A
@@ -15,9 +14,6 @@ MOV R3,A
 HERE:SJMP HERE
 END
 
-; =========================================================================
-; EXP 2 - PART 2: ASCII TO PACKED BCD (8051)
-; =========================================================================
 ORG 0000H
 MOV A,#35H
 MOV R1,A
@@ -30,48 +26,35 @@ CLR C
 SUBB A,#30H
 ORL A,R2
 MOV R3,A
-
 HERE:SJMP HERE
 END
 
-; =========================================================================
-; EXP 2 - PART 3: COUNT NUMBER OF 1s IN 97H (8051)
-; =========================================================================
 ORG 0000H
-
 MOV R1, #08H
 MOV R2, #00H
 MOV R0, #97H
 MOV A, R0
-
 BACK: RRC A
       JNC SKIP
       INC R2
-
 SKIP: DJNZ R1, BACK
-
 END
 
-; =========================================================================
-; EXP 3: BLOCK DATA TRANSFER 40H TO 60H (8051)
-; =========================================================================
-ORG 0000H
+EXP 3
 
+ORG 0000H
 MOV R0, #40H
 MOV R2, #0AH
 MOV R1, #60H
-
 BACK: MOV A, @R0
       MOV @R1, A
       INC R0
       INC R1
       DJNZ R2, BACK
-
 END
 
-; =========================================================================
-; EXP 4: BUBBLE SORT ASCENDING ORDER AT 30H (8051)
-; =========================================================================
+EXP 4
+
 ORG 0000H
 MOV R2,#04H
 PASS :
@@ -96,43 +79,30 @@ STOP:
 	SJMP STOP
 END
 
-; =========================================================================
-; EXP 5 - PART 1: TIMER 0 SQUARE WAVE ON P1.5 (8051)
-; =========================================================================
-ORG 0000H
+EXP 5
 
+ORG 0000H
 AGAIN:
     MOV TMOD,#01H
     MOV TL0,#1AH
     MOV TH0,#0FFH
-
     CPL P1.5
     LCALL DELAY
-
     SJMP AGAIN
-
 DELAY:
     SETB TR0
-
 WAIT:
     JNB TF0,WAIT
-
     CLR TR0
     CLR TF0
     RET
-
 END
 
-; =========================================================================
-; EXP 5 - PART 2: SERIAL COMMUNICATION "HELLO " (8051)
-; =========================================================================
 ORG 0000H
-
 MOV SCON,#50H
 MOV TMOD,#20H
 MOV TH1,#0FDH
 SETB TR1
-
 AGAIN:
     MOV A,#'H'
     ACALL Trans
@@ -147,84 +117,58 @@ AGAIN:
     MOV A,#' '
     ACALL Trans
     SJMP AGAIN
-
 Trans:
     MOV SBUF,A
 HERE:
     JNB TI,HERE
     CLR TI
     RET
-
 END
 
-; =========================================================================
-; EXP 7: ARM7 ARITHMETIC OPERATIONS (ADD, SUB, UMULL)
-; =========================================================================
+EXP 7
+
 AREA MATHS, CODE, READONLY
-
 ENTRY
-
 MOV R7, #0x40000000
 MOV R8, #0x40000004
-
 LDR R0, [R7]
 LDR R1, [R8]
-
 ADD R2, R1, R0
 STR R2, [R7, #8]
-
 SUB R2, R1, R0
 STR R2, [R7, #12]
-
 UMULL R3, R2, R1, R0
 STR R3, [R7, #16]
 STR R2, [R7, #20]
-
 EXIT
 B EXIT
-
 END
 
-; =========================================================================
-; EXP 8: ARM7 SMALLEST NUMBER IN ARRAY OF 10
-; =========================================================================
+EXP 8
+
 AREA SMALL, CODE, READONLY
-
 ENTRY
-
 LDR R1, =0x40000000
 LDR R2, =0x40000030
-
 MOV R5, #09
-
 LDR R3, [R1]
-
 LOOP
 ADD R1, R1, #4
-
 LDR R4, [R1]
-
 CMP R3, R4
 BLO LOOP1
-
 MOV R3, R4
-
 LOOP1
 SUBS R5, R5, #01
 CMP R5, #00
 BNE LOOP
-
 STR R3, [R2]
-
 SWI 0X11
-
 EXIT B EXIT
-
 END
 
-// =========================================================================
-// EXP 10: 7-SEGMENT DISPLAY 0 TO 9 (ARDUINO / NODEMCU)
-// =========================================================================
+EXP 10
+
 const int segmentPins[7] = {D2, D3, D4, D5, D6, D7, D8};
 
 const bool digits[10][7] = {
