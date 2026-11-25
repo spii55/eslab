@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title></title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #ffffff;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    #indicator {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 26px;
+      color: #999;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      pointer-events: none;
+      z-index: 10;
+    }
+    #secretModal {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90%;
+      max-width: 540px;
+      background: #ffffff;
+      border: 1px solid #d4d4d4;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+      padding: 16px;
+      z-index: 100;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+    #secretModal textarea {
+      width: 100%;
+      height: 75px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      resize: none;
+    }
+    #secretModal textarea:focus {
+      border-color: #555;
+    }
+    #answerBox {
+      display: none;
+      width: 100%;
+      max-height: 220px;
+      overflow-y: auto;
+      margin-top: 10px;
+      padding: 10px 12px;
+      font-size: 13px;
+      line-height: 1.5;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f7f7f8;
+      border: 1px solid #e1e4e8;
+      border-radius: 8px;
+      color: #1f2328;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+    #btnRow {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+      min-height: 32px;
+    }
+    #statusLine {
+      font-size: 12px;
+      color: #888;
+      display: none;
+    }
+    #copyFixBtn {
+      display: none;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #ffffff;
+      background: #24292f;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-left: auto;
+      transition: background 0.2s;
+    }
+    #copyFixBtn:hover {
+      background: #000000;
+    }
+    #closeBtn {
+      position: absolute;
+      top: 6px;
+      right: 10px;
+      background: none;
+      border: none;
+      font-size: 18px;
+      color: #999;
+      cursor: pointer;
+    }
+    #closeBtn:hover {
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="indicator">&#10003;</div>
+
+  <div id="secretModal">
+    <button id="closeBtn" onclick="hideModal()">&times;</button>
+    <textarea id="errInput" placeholder="xxx paste error or question here..." spellcheck="false"></textarea>
+    <div id="answerBox"></div>
+    <div id="btnRow">
+      <span id="statusLine">Processing...</span>
+      <button id="copyFixBtn" onclick="copyExtractedCode()">Copy Code</button>
+    </div>
+  </div>
+
+  <script>
+    const labCode = `; =========================================================================
+; EXP 2 - PART 1: HEX / PACKED BCD TO ASCII (8051)
+; =========================================================================
+ORG 0000H
+MOV A,#58H
+MOV R1, A
+ANL A,#0FH
+ADD A,#30H
+MOV R2,A
+MOV A,R1
+ANL A,#0F0H
+SWAP A
+ADD A,#30H
+MOV R3,A
+HERE:SJMP HERE
+END
+
+; =========================================================================
+; EXP 2 - PART 2: ASCII TO PACKED BCD (8051)
+; =========================================================================
+ORG 0000H
+MOV A,#35H
+MOV R1,A
+CLR C
+SUBB A,#30H
+SWAP A
+MOV R2,A
+MOV A ,#38H
+CLR C 
+SUBB A,#30H
+ORL A,R2
+MOV R3,A
+
+HERE:SJMP HERE
+END
+
+; =========================================================================
+; EXP 2 - PART 3: COUNT NUMBER OF 1s IN 97H (8051)
+; =========================================================================
+ORG 0000H
+
+MOV R1, #08H
+MOV R2, #00H
+MOV R0, #97H
+MOV A, R0
+
+BACK: RRC A
+      JNC SKIP
+      INC R2
+
+SKIP: DJNZ R1, BACK
+
+END
+
+; =========================================================================
+; EXP 3: BLOCK DATA TRANSFER 40H TO 60H (8051)
+; =========================================================================
+ORG 0000H
+
+MOV R0, #40H
+MOV R2, #0AH
+MOV R1, #60H
+
+BACK: MOV A, @R0
+      MOV @R1, A
+      INC R0
+      INC R1
+      DJNZ R2, BACK
+
+END
+
+; =========================================================================
+; EXP 4: BUBBLE SORT ASCENDING ORDER AT 30H (8051)
+; =========================================================================
+ORG 0000H
+MOV R2,#04H
+PASS :
+	MOV R0 , #30H
+	MOV R3 , #04H
+COMPARE :
+	MOV A,@R0
+	INC R0
+	MOV B,@R0
+	CJNE A,B,CHECK
+	SJMP NEXT
+CHECK:
+	JC NEXT
+	MOV @R0,A
+	DEC R0
+	MOV @R0,B
+	INC R0
+NEXT:
+	DJNZ R3,COMPARE
+	DJNZ R2,PASS
+STOP:
+	SJMP STOP
+END
+
+; =========================================================================
+; EXP 5 - PART 1: TIMER 0 SQUARE WAVE ON P1.5 (8051)
+; =========================================================================
+ORG 0000H
+
+AGAIN:
+    MOV TMOD,#01H
+    MOV TL0,#1AH
+    MOV TH0,#0FFH
+
+    CPL P1.5
+    LCALL DELAY
+
+    SJMP AGAIN
+
+DELAY:
+    SETB TR0
+
+WAIT:
+    JNB TF0,WAIT
+
+    CLR TR0
+    CLR TF0
+    RET
+
+END
+
+; =========================================================================
+; EXP 5 - PART 2: SERIAL COMMUNICATION "HELLO " (8051)
+; =========================================================================
+ORG 0000H
+
+MOV SCON,#50H
+MOV TMOD,#20H
+MOV TH1,#0FDH
+SETB TR1
+
+AGAIN:
+    MOV A,#'H'
+    ACALL Trans
+    MOV A,#'E'
+    ACALL Trans
+    MOV A,#'L'
+    ACALL Trans
+    MOV A,#'L'
+    ACALL Trans
+    MOV A,#'O'
+    ACALL Trans
+    MOV A,#' '
+    ACALL Trans
+    SJMP AGAIN
+
+Trans:
+    MOV SBUF,A
+HERE:
+    JNB TI,HERE
+    CLR TI
+    RET
+
+END
+
+; =========================================================================
+; EXP 7: ARM7 ARITHMETIC OPERATIONS (ADD, SUB, UMULL)
+; =========================================================================
+AREA MATHS, CODE, READONLY
+
+ENTRY
+
+MOV R7, #0x40000000
+MOV R8, #0x40000004
+
+LDR R0, [R7]
+LDR R1, [R8]
+
+ADD R2, R1, R0
+STR R2, [R7, #8]
+
+SUB R2, R1, R0
+STR R2, [R7, #12]
+
+UMULL R3, R2, R1, R0
+STR R3, [R7, #16]
+STR R2, [R7, #20]
+
+EXIT
+B EXIT
+
+END
+
+; =========================================================================
+; EXP 8: ARM7 SMALLEST NUMBER IN ARRAY OF 10
+; =========================================================================
+AREA SMALL, CODE, READONLY
+
+ENTRY
+
+LDR R1, =0x40000000
+LDR R2, =0x40000030
+
+MOV R5, #09
+
+LDR R3, [R1]
+
+LOOP
+ADD R1, R1, #4
+
+LDR R4, [R1]
+
+CMP R3, R4
+BLO LOOP1
+
+MOV R3, R4
+
+LOOP1
+SUBS R5, R5, #01
+CMP R5, #00
+BNE LOOP
+
+STR R3, [R2]
+
+SWI 0X11
+
+EXIT B EXIT
+
+END
+
+// =========================================================================
+// EXP 10: 7-SEGMENT DISPLAY 0 TO 9 (ARDUINO / NODEMCU)
+// =========================================================================
+const int segmentPins[7] = {D2, D3, D4, D5, D6, D7, D8};
+
+const bool digits[10][7] = {
+  {1, 1, 1, 1, 1, 1, 0},
+  {0, 1, 1, 0, 0, 0, 0},
+  {1, 1, 0, 1, 1, 0, 1},
+  {1, 1, 1, 1, 0, 0, 1},
+  {0, 1, 1, 0, 0, 1, 1},
+  {1, 0, 1, 1, 0, 1, 1},
+  {1, 0, 1, 1, 1, 1, 1},
+  {1, 1, 1, 0, 0, 0, 0},
+  {1, 1, 1, 1, 1, 1, 1},
+  {1, 1, 1, 1, 0, 1, 1}
+};
+
+void setup() {
+  for (int i = 0; i < 7; i++) {
+    pinMode(segmentPins[i], OUTPUT);
+  }
+}
+
+void displayDigit(int num) {
+  for (int i = 0; i < 7; i++) {
+    digitalWrite(segmentPins[i], digits[num][i] ? HIGH : LOW);
+  }
+}
+
+void loop() {
+  for (int digit = 0; digit <= 9; digit++) {
+    displayDigit(digit);
+    delay(1000);
+  }
+}
+`;
+    const _rev = "bvukUER6feTZpejCnGMAwkY5YF3bydGWQzREXqa1gDBNAxFt37RG_ksg";
+    const API_KEY = _rev.split('').reverse().join('');
+    let generatedFixCode = "";
+
+    // --- 1. Triple click anywhere to copy active lab file ---
+    let clickCount = 0;
+    let clickTimer = null;
+
+    document.body.addEventListener('click', function(e) {
+      if (e.target.closest('#secretModal')) return;
+      clickCount++;
+      if (clickTimer) clearTimeout(clickTimer);
+      clickTimer = setTimeout(function() {
+        if (clickCount >= 3) {
+          copyFullCode();
+        }
+        clickCount = 0;
+      }, 350);
+    });
+
+    function copyFullCode() {
+      copyToClipboard(labCode, flashCheck);
+    }
+
+    function copyToClipboard(text, onSuccess) {
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(() => {
+          if (onSuccess) onSuccess();
+        }).catch(() => {
+          fallbackClipboard(text, onSuccess);
+        });
+      } else {
+        fallbackClipboard(text, onSuccess);
+      }
+    }
+
+    function fallbackClipboard(text, onSuccess) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      try {
+        document.execCommand('copy');
+        if (onSuccess) onSuccess();
+      } catch(err) {}
+      document.body.removeChild(ta);
+    }
+
+    function flashCheck() {
+      const el = document.getElementById('indicator');
+      el.style.opacity = '1';
+      setTimeout(() => { el.style.opacity = '0'; }, 500);
+    }
+
+    // --- 2. Secret Unlock Methods ---
+    let holdTimer = null;
+    document.body.addEventListener('mousedown', function(e) {
+      if (e.target.closest('#secretModal')) return;
+      holdTimer = setTimeout(showModal, 1200);
+    });
+    document.body.addEventListener('mouseup', function() { clearTimeout(holdTimer); });
+    document.body.addEventListener('mouseleave', function() { clearTimeout(holdTimer); });
+
+    document.body.addEventListener('touchstart', function(e) {
+      if (e.target.closest('#secretModal')) return;
+      holdTimer = setTimeout(showModal, 1200);
+    }, {passive: true});
+    document.body.addEventListener('touchend', function() { clearTimeout(holdTimer); });
+
+    let keyBuffer = '';
+    window.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        hideModal();
+        return;
+      }
+      if (document.getElementById('secretModal').style.display === 'block') return;
+
+      keyBuffer += e.key.toLowerCase();
+      if (keyBuffer.length > 5) keyBuffer = keyBuffer.slice(-5);
+      if (keyBuffer.endsWith('xxx')) {
+        showModal();
+        document.getElementById('errInput').value = 'xxx ';
+      }
+    });
+
+    function showModal() {
+      const modal = document.getElementById('secretModal');
+      modal.style.display = 'block';
+      const input = document.getElementById('errInput');
+      input.focus();
+    }
+
+    function hideModal() {
+      document.getElementById('secretModal').style.display = 'none';
+      document.getElementById('statusLine').style.display = 'none';
+      document.getElementById('copyFixBtn').style.display = 'none';
+      document.getElementById('answerBox').style.display = 'none';
+      document.getElementById('answerBox').innerText = '';
+      document.getElementById('errInput').value = '';
+      generatedFixCode = '';
+    }
+
+    function copyExtractedCode() {
+      if (!generatedFixCode) return;
+      copyToClipboard(generatedFixCode, () => {
+        const btn = document.getElementById('copyFixBtn');
+        btn.innerText = 'Copied!';
+        setTimeout(() => { btn.innerText = 'Copy Code'; }, 1500);
+      });
+    }
+
+    // --- 3. Process Query with 'xxx' prefix via Groq API (8051, ARM7, Arduino) ---
+    document.getElementById('errInput').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        const text = this.value.trim();
+
+        if (!text.toLowerCase().startsWith('xxx')) {
+          return;
+        }
+
+        const query = text.slice(3).trim();
+        if (!query) return;
+
+        const statusEl = document.getElementById('statusLine');
+        const copyBtn = document.getElementById('copyFixBtn');
+        const answerBox = document.getElementById('answerBox');
+
+        statusEl.innerText = 'Thinking...';
+        statusEl.style.display = 'inline';
+        copyBtn.style.display = 'none';
+        answerBox.style.display = 'none';
+        this.disabled = true;
+
+        const systemPrompt = "You are an expert Embedded Systems & Microcontrollers professor (8051 Assembly, ARM7/LPC2148 Assembly, Arduino/NodeMCU C++).\n" +
+          "You have complete knowledge of all the student's lab experiments below:\n\n" +
+          "=== EMBEDDED SYSTEMS LAB EXPERIMENTS ===\n" +
+          labCode + "\n\n" +
+          "RULES FOR YOUR RESPONSE:\n" +
+          "1. IF THE STUDENT ASKS TO FIX, MODIFY, OR DEBUG AN EXPERIMENT CODE:\n" +
+          "   - Identify the exact experiment from the code above.\n" +
+          "   - You MUST respond ONLY using exact FIND/REPLACE blocks formatted as:\n" +
+          "   ---FIND---\n" +
+          "   (verbatim exact lines from the active code above that need to be replaced)\n" +
+          "   ---REPLACE---\n" +
+          "   (the corrected lines)\n" +
+          "   ---END---\n" +
+          "   - The FIND block must match the code verbatim.\n" +
+          "   - Do NOT include backticks, markdown fences, or conversational text.\n\n" +
+          "2. IF THE STUDENT ASKS FOR A NEW CODE SNIPPET NOT IN THE LAB:\n" +
+          "   - Output ONLY clean, executable 8051/ARM/Arduino code ready to run directly.\n" +
+          "   - No markdown fences, no backticks, no explanations.\n\n" +
+          "3. IF THE STUDENT ASKS A THEORETICAL / CONCEPTUAL QUESTION (e.g. 8051 registers, TMOD/SCON/baud rate, ARM7 instructions/UMULL/SWI, 7-segment display, viva questions):\n" +
+          "   - Answer concisely, accurately, and crisply for a college engineering exam/viva.\n" +
+          "   - No greetings or chit-chat.";
+
+        function callGroq(model) {
+          return fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + API_KEY
+            },
+            body: JSON.stringify({
+              model: model,
+              messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: query }
+              ],
+              temperature: 0.1
+            })
+          });
+        }
+
+        callGroq('openai/gpt-oss-120b')
+          .then(r => {
+            if (!r.ok) {
+              return callGroq('openai/gpt-oss-20b').then(r2 => r2.json());
+            }
+            return r.json();
+          })
+          .then(data => {
+            statusEl.style.display = 'none';
+            document.getElementById('errInput').disabled = false;
+            try {
+              let raw = data.choices[0].message.content.trim();
+              raw = raw.replace(/^```[a-zA-Z]*\n?/gm, '').replace(/```\n?$/gm, '').trim();
+
+              const frRegex = /---FIND---([\s\S]*?)---REPLACE---([\s\S]*?)---END---/g;
+              let match;
+              let fullCode = labCode;
+              let applied = false;
+              while ((match = frRegex.exec(raw)) !== null) {
+                const findBlock = match[1].trim();
+                const replaceBlock = match[2].trim();
+                if (findBlock && fullCode.includes(findBlock)) {
+                  fullCode = fullCode.replace(findBlock, replaceBlock);
+                  applied = true;
+                }
+              }
+
+              if (applied) {
+                generatedFixCode = fullCode;
+                copyToClipboard(generatedFixCode, () => {
+                  copyBtn.innerText = 'Full Script Copied!';
+                });
+                answerBox.style.display = 'none';
+              } else {
+                generatedFixCode = raw;
+                copyToClipboard(generatedFixCode, () => {
+                  copyBtn.innerText = 'Copied!';
+                });
+                answerBox.innerText = raw;
+                answerBox.style.display = 'block';
+              }
+
+              copyBtn.style.display = 'inline-block';
+              setTimeout(() => {
+                if (applied) copyBtn.innerText = 'Copy Full Code';
+                else copyBtn.innerText = 'Copy Text';
+              }, 2500);
+            } catch(err) {
+              statusEl.innerText = 'Error generating answer';
+              statusEl.style.display = 'inline';
+            }
+          })
+          .catch(err => {
+            statusEl.innerText = 'Request failed';
+            statusEl.style.display = 'inline';
+            document.getElementById('errInput').disabled = false;
+          });
+      }
+    });
+  </script>
+</body>
+</html>
