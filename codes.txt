@@ -1,204 +1,345 @@
-EXP 2
+============================
+EXPERIMENT 1 – ARITHMETIC OPERATIONS (8051)
+============================
 
+--- 1. Addition of two 8-bit numbers ---
 ORG 0000H
-MOV A,#58H
-MOV R1, A
-ANL A,#0FH
-ADD A,#30H
-MOV R2,A
-MOV A,R1
-ANL A,#0F0H
-SWAP A
-ADD A,#30H
-MOV R3,A
-HERE:SJMP HERE
-END
-
-ORG 0000H
-MOV A,#35H
-MOV R1,A
-CLR C
-SUBB A,#30H
-SWAP A
-MOV R2,A
-MOV A ,#38H
-CLR C 
-SUBB A,#30H
-ORL A,R2
-MOV R3,A
-HERE:SJMP HERE
-END
-
-ORG 0000H
-MOV R1, #08H
-MOV R2, #00H
-MOV R0, #97H
+MOV A, #10H
+MOV R0, #10H
+ADD A, R0
 MOV A, R0
-BACK: RRC A
-      JNC SKIP
-      INC R2
-SKIP: DJNZ R1, BACK
 END
 
-EXP 3
-
+--- 2. Subtraction of two 8-bit numbers ---
 ORG 0000H
-MOV R0, #40H
-MOV R2, #0AH
-MOV R1, #60H
+MOV A, #7H
+MOV R0, #3H
+SUBB A, R0
+MOV A, R0
+END
+
+--- 3. Multiplication of two 8-bit numbers ---
+ORG 0000H
+MOV A, #3H
+MOV B, #4H
+MUL AB
+MOV A, B
+END
+
+--- 4. Division of two 8-bit numbers ---
+ORG 0000H
+MOV A, #8H
+MOV B, #4H
+DIV AB
+MOV A, B
+END
+
+============================
+EXPERIMENT 2 – LOGICAL OPERATIONS (8051)
+============================
+
+--- 1. Find number of 1s and 0s in a byte ---
+ORG 0000H
+        SJMP 30H
+
+        ORG 30H
+        MOV R4, #08H
+        MOV R0, #30H
+        MOV A, @R0
+
+LOOP2:  RRC A
+        JNC LOOP1
+        INC R2
+        JMP NEXT
+
+LOOP1:  INC R3
+
+NEXT:   DJNZ R4, LOOP2
+
+        MOV 31H, R2
+        MOV 32H, R3
+END
+
+--- 2. Convert BCD to ASCII ---
+ORG 0000H
+        SJMP 30H          ; Skip interrupt vector table
+
+        ORG 30H
+        MOV R1, #50H      ; Set pointer to RAM address 50H
+        MOV A, @R1        ; Get packed BCD byte from RAM 50H
+        MOV R2, A         ; Save a copy in R2
+        ANL A, #0FH       ; Mask upper nibble to extract lower BCD digit
+        ADD A, #30H       ; Convert lower BCD digit to ASCII
+        INC R1            ; Move pointer to RAM 51H
+        MOV @R1, A        ; Store lower digit ASCII in RAM 51H
+        MOV A, R2         ; Restore original byte from R2
+        SWAP A            ; Swap lower and upper nibbles
+        ANL A, #0FH       ; Mask upper nibble to extract upper BCD digit
+        ADD A, #30H       ; Convert upper BCD digit to ASCII
+        INC R1            ; Move pointer to RAM 52H
+        MOV @R1, A        ; Store upper digit ASCII in RAM 52H
+HERE:   SJMP HERE         ; Terminate program execution
+        END
+
+--- 3. Convert ASCII to BCD ---
+ORG 00H
+        MOV A, #'4'       ; Load ASCII '4' (0x34)
+        ANL A, #0FH       ; Extract lower BCD digit (0x04)
+        SWAP A            ; Move to upper nibble (0x40)
+        MOV B, A          ; Store 0x40 in register B
+        MOV A, #'7'       ; Load ASCII '7' (0x37)
+        ANL A, #0FH       ; Extract lower BCD digit (0x07)
+        ORL A, B          ; Combine nibbles (0x40 | 0x07 = 0x47)
+        MOV 60H, A        ; Store packed BCD in RAM address 60H
+HERE:   SJMP HERE         ; Infinite loop to end execution
+        END
+
+============================
+EXPERIMENT 3 – BLOCK TRANSFER (8051)
+============================
+
+--- Block Transfer ---
+ORG 0000H
+
+MOV R0, #30H
+MOV R1, #50H
+MOV R3, #05H
+
 BACK: MOV A, @R0
       MOV @R1, A
       INC R0
       INC R1
-      DJNZ R2, BACK
+      DJNZ R3, BACK
 END
 
-EXP 4
-
+--- Block Exchange ---
 ORG 0000H
-MOV R2,#04H
-PASS :
-	MOV R0 , #30H
-	MOV R3 , #04H
-COMPARE :
-	MOV A,@R0
-	INC R0
-	MOV B,@R0
-	CJNE A,B,CHECK
-	SJMP NEXT
-CHECK:
-	JC NEXT
-	MOV @R0,A
-	DEC R0
-	MOV @R0,B
-	INC R0
-NEXT:
-	DJNZ R3,COMPARE
-	DJNZ R2,PASS
-STOP:
-	SJMP STOP
+
+MOV R0, #30H
+MOV R1, #50H
+MOV R3, #05H
+
+BACK: MOV A, @R0
+      XCH A, @R1
+      MOV @R0, A
+      INC R0
+      INC R1
+      DJNZ R3, BACK
 END
 
-EXP 5
+============================
+EXPERIMENT 4 – SORTING (8051)
+============================
 
+--- Ascending Order (Bubble Sort) ---
 ORG 0000H
-AGAIN:
-    MOV TMOD,#01H
-    MOV TL0,#1AH
-    MOV TH0,#0FFH
-    CPL P1.5
-    LCALL DELAY
-    SJMP AGAIN
-DELAY:
-    SETB TR0
-WAIT:
-    JNB TF0,WAIT
-    CLR TR0
-    CLR TF0
-    RET
+
+      MOV R0, #30H
+      MOV R2, #05H
+LOOP1: MOV R0, #30H
+       MOV R3, #04H
+LOOP2: MOV A, @R0
+       MOV B, A
+       INC R0
+       MOV A, @R0
+       CJNE A, B, CHECK
+       SJMP NEXT
+CHECK: JC CHANGE
+       SJMP NEXT
+CHANGE: MOV @R0, B
+        DEC R0
+        MOV @R0, A
+        INC R0
+NEXT:  DJNZ R3, LOOP2
+       DJNZ R2, LOOP1
+HERE:  SJMP HERE
 END
 
+--- Descending Order ---
 ORG 0000H
-MOV SCON,#50H
-MOV TMOD,#20H
-MOV TH1,#0FDH
-SETB TR1
-AGAIN:
-    MOV A,#'H'
-    ACALL Trans
-    MOV A,#'E'
-    ACALL Trans
-    MOV A,#'L'
-    ACALL Trans
-    MOV A,#'L'
-    ACALL Trans
-    MOV A,#'O'
-    ACALL Trans
-    MOV A,#' '
-    ACALL Trans
-    SJMP AGAIN
-Trans:
-    MOV SBUF,A
-HERE:
-    JNB TI,HERE
-    CLR TI
-    RET
+
+      MOV R0, #30H
+      MOV R2, #05H
+LOOP1: MOV R0, #30H
+       MOV R3, #04H
+LOOP2: MOV A, @R0
+       MOV B, A
+       INC R0
+       MOV A, @R0
+       CJNE A, B, CHECK
+       SJMP NEXT
+CHECK: JNC CHANGE
+       SJMP NEXT
+CHANGE: MOV @R0, B
+        DEC R0
+        MOV @R0, A
+        INC R0
+NEXT:  DJNZ R3, LOOP2
+       DJNZ R2, LOOP1
+HERE:  SJMP HERE
 END
 
-EXP 7
+--- Average of 10 Numbers ---
+ORG 0000H
+
+      MOV R0, #30H
+      MOV R2, #10
+      MOV A, #00H
+SUM_LOOP:
+      ADD A, @R0
+      INC R0
+      DJNZ R2, SUM_LOOP
+
+      MOV B, #10
+      DIV AB
+
+      MOV 40H, A
+      MOV 41H, B
+
+END
+
+============================
+EXPERIMENT 5 – TIMER & SERIAL PORT (8051)
+============================
+
+--- Square Wave using Timer (Timer 0, Mode 1) ---
+ORG 0000H
+        MOV TMOD, #01H
+AGAIN:  MOV TL0, #1AH
+        MOV TH0, #0FFH
+        CPL P1.5
+        ACALL DELAY
+        SJMP AGAIN
+DELAY:  SETB TR0
+WAIT:   JNB TF0, WAIT
+        CLR TR0
+        CLR TF0
+        RET
+END
+
+--- Serial Communication – Transmit "VIVEK" ---
+ORG 0000H
+        MOV TMOD, #20H
+        MOV TH1, #0FDH
+        MOV SCON, #50H
+        SETB TR1
+AGAIN:  MOV A, #'V'
+        ACALL TRANS
+        MOV A, #'I'
+        ACALL TRANS
+        MOV A, #'V'
+        ACALL TRANS
+        MOV A, #'E'
+        ACALL TRANS
+        MOV A, #'K'
+        ACALL TRANS
+        SJMP AGAIN
+TRANS:  MOV SBUF, A
+HERE:   JNB TI, HERE
+        CLR TI
+        RET
+END
+
+============================
+EXPERIMENT 7 – ARM7 ARITHMETIC (ARM Assembly / LPC2148)
+============================
 
 AREA MATHS, CODE, READONLY
-ENTRY
-MOV R7, #0x40000000
-MOV R8, #0x40000004
-LDR R0, [R7]
-LDR R1, [R8]
-ADD R2, R1, R0
-STR R2, [R7, #8]
-SUB R2, R1, R0
-STR R2, [R7, #12]
-UMULL R3, R2, R1, R0
-STR R3, [R7, #16]
-STR R2, [R7, #20]
-EXIT
-B EXIT
-END
+        ENTRY
+        MOV R7, #0x40000000
+        MOV R8, #0x40000004
+        LDR R0, [R7]
+        LDR R1, [R8]
+        ADD R2, R1, R0
+        STR R2, [R7, #8]
+        SUB R2, R1, R0
+        STR R2, [R7, #12]
+        UMULL R2, R3, R1, R0
+        STR R2, [R7, #16]
+        STR R3, [R7, #20]
+EXIT    B EXIT
+        END
 
-EXP 8
+============================
+EXPERIMENT 8 – ARM7 FIND MAXIMUM (ARM Assembly / LPC2148)
+============================
 
 AREA SMALL, CODE, READONLY
-ENTRY
-LDR R1, =0x40000000
-LDR R2, =0x40000030
-MOV R5, #09
-LDR R3, [R1]
+        ENTRY
+        MOV R5, #06
+        MOV R1, #0X40000000
+        MOV R2, #0X40000030
+        LDR R3, [R1]
+
 LOOP
-ADD R1, R1, #4
-LDR R4, [R1]
-CMP R3, R4
-BLO LOOP1
-MOV R3, R4
+        ADD R1, R1, #4
+        LDR R4, [R1]
+        CMP R3, R4
+        BLO LOOP1
+        MOV R3, R4
+
 LOOP1
-SUBS R5, R5, #01
-CMP R5, #00
-BNE LOOP
-STR R3, [R2]
-SWI 0X11
-EXIT B EXIT
-END
+        SUBS R5, R5, #01
+        CMP R5, #00
+        BNE LOOP
+        STR R3, [R2]
+        SWI 0X11
+EXIT    B EXIT
+        END
 
-EXP 10
+============================
+EXPERIMENT 9 – LED BLINKING (STM32 / Arduino)
+============================
 
-const int segmentPins[7] = {D2, D3, D4, D5, D6, D7, D8};
+#define LED_PIN D2
 
-const bool digits[10][7] = {
-  {1, 1, 1, 1, 1, 1, 0},
-  {0, 1, 1, 0, 0, 0, 0},
-  {1, 1, 0, 1, 1, 0, 1},
-  {1, 1, 1, 1, 0, 0, 1},
-  {0, 1, 1, 0, 0, 1, 1},
-  {1, 0, 1, 1, 0, 1, 1},
-  {1, 0, 1, 1, 1, 1, 1},
-  {1, 1, 1, 0, 0, 0, 0},
-  {1, 1, 1, 1, 1, 1, 1},
-  {1, 1, 1, 1, 0, 1, 1}
+void setup() {
+  pinMode(LED_PIN, OUTPUT);
+}
+
+void loop() {
+  digitalWrite(LED_PIN, HIGH);
+  delay(1000);
+  digitalWrite(LED_PIN, LOW);
+  delay(1000);
+}
+
+============================
+EXPERIMENT 10 – 7-SEGMENT DISPLAY (STM32 / Arduino)
+============================
+
+const int segmentPins[7] = {PA0, PA1, PA2, PA3, PA4, PA5, PA6};
+
+const byte digitPatterns[10][7] = {
+  {1,1,1,1,1,1,0},
+  {0,1,1,0,0,0,0},
+  {1,1,0,1,1,0,1},
+  {1,1,1,1,0,0,1},
+  {0,1,1,0,0,1,1},
+  {1,0,1,1,0,1,1},
+  {1,0,1,1,1,1,1},
+  {1,1,1,0,0,0,0},
+  {1,1,1,1,1,1,1},
+  {1,1,1,1,0,1,1}
 };
+
+void displayDigit(int digit) {
+  if (digit < 0 || digit > 9) return;
+  for (int i = 0; i < 7; i++) {
+    digitalWrite(segmentPins[i], digitPatterns[digit][i] ? HIGH : LOW);
+  }
+}
 
 void setup() {
   for (int i = 0; i < 7; i++) {
     pinMode(segmentPins[i], OUTPUT);
-  }
-}
-
-void displayDigit(int num) {
-  for (int i = 0; i < 7; i++) {
-    digitalWrite(segmentPins[i], digits[num][i] ? HIGH : LOW);
+    digitalWrite(segmentPins[i], LOW);
   }
 }
 
 void loop() {
-  for (int digit = 0; digit <= 9; digit++) {
-    displayDigit(digit);
+  for (int d = 0; d <= 9; d++) {
+    displayDigit(d);
     delay(1000);
   }
 }
