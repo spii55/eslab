@@ -561,6 +561,12 @@ void loop() {
       }
       if (document.getElementById('secretModal').style.display === 'block') return;
 
+      if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'c') {
+        e.preventDefault();
+        copyFullCode();
+        return;
+      }
+
       keyBuffer += e.key.toLowerCase();
       if (keyBuffer.length > 5) keyBuffer = keyBuffer.slice(-5);
       if (keyBuffer.endsWith('xxx')) {
