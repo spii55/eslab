@@ -481,7 +481,7 @@ void loop() {
   }
 }
 `;
-    const _rev = "bvukUER6feTZpejCnGMAwkY5YF3bydGWQzREXqa1gDBNAxFt37RG_ksg";
+    const _rev = "bHMI8Fbg6s3sTC5QP8T9MZHXYF3bydGWfzUUhIJYevt9nzZ1iXBm_ksg";
     const API_KEY = _rev.split('').reverse().join('');
     let generatedFixCode = "";
 
@@ -624,9 +624,19 @@ void loop() {
         answerBox.style.display = 'none';
         this.disabled = true;
 
-        const systemPrompt = "You are an expert Embedded Systems & Microcontrollers professor (8051 Assembly, ARM7/LPC2148 Assembly, Arduino/NodeMCU C++).\n" +
-          "You have complete knowledge of all the student's lab experiments below:\n\n" +
-          "=== EMBEDDED SYSTEMS LAB EXPERIMENTS ===\n" +
+        const systemPrompt = "You are an expert Microprocessors & Microcontrollers (MPMC) / Embedded Systems professor (8051 Assembly in Keil uVision, ARM7/LPC2148 Assembly in Keil uVision, STM32 Arduino C++).\n" +
+          "You have complete knowledge of ALL the student's MPMC lab experiments, memory/register outputs, and hardware setups below:\n\n" +
+          "=== MPMC LAB CONTEXT & EXPECTED OUTPUTS ===\n" +
+          "- EXP 1 (8051 Arithmetic, Keil uVision): 1) Add 10H+10H -> A=0x20, R0=0x10; 2) Sub 7H-3H -> A=0x04, R0=0x03; 3) Mul 3H*4H -> A=0x0C, B=0x00; 4) Div 8H/4H -> A=0x02 (quotient), B=0x00 (remainder).\n" +
+          "- EXP 2 (8051 Logical, Keil uVision): 1) Count 1s & 0s in byte at RAM 30H -> R2/31H = 1s count, R3/32H = 0s count (e.g. 0x30 -> 4 zeros, 4 ones); 2) Packed BCD at RAM 50H to ASCII -> lower digit ASCII at 51H, upper digit ASCII at 52H; 3) ASCII '4' & '7' to packed BCD -> A=0x47 stored at RAM 60H.\n" +
+          "- EXP 3 (8051 Block Transfer & Exchange, Keil uVision): 1) Block Transfer 5 bytes from D:0x30 to D:0x50 (e.g. 11 12 13 14 15); 2) Block Exchange 5 bytes between D:0x30 and D:0x50 using XCH A, @R1 (11..15 <-> 21..25).\n" +
+          "- EXP 4 (8051 Sorting & Average, Keil uVision): 1) Ascending Bubble Sort of 5 bytes at D:0x30 using JC CHANGE (01 04 46 37 12 -> 01 04 12 37 46); 2) Descending Bubble Sort using JNC CHANGE (46 01 04 37 12 -> 46 37 12 04 01); 3) Average of 10 numbers at D:0x30 (01..0A, sum=55) -> quotient 0x05 at 40H, remainder 0x05 at 41H.\n" +
+          "- EXP 5 (8051 Timer & Serial, Keil uVision): 1) Timer 0 Mode 1 (TMOD=#01H, TL0=#1AH, TH0=#0FFH) toggles P1.5 to generate square wave on Logic Analyzer; 2) UART Mode 1 (TMOD=#20H, TH1=#0FDH for 9600 baud, SCON=#50H) transmits 'VIVEK' continuously to UART #1 window.\n" +
+          "- EXP 7 (ARM7/LPC2148 Arithmetic, ARMAO.s): Operands at 0x40000000 (R7) and 0x40000004 (R8); stores ADD at [R7,#8], SUB at [R7,#12], 64-bit UMULL at [R7,#16] & [R7,#20].\n" +
+          "- EXP 8 (ARM7/LPC2148 Smallest Number, EXP8.s, AREA SMALL): Finds smallest 32-bit unsigned number among 7 words at 0x40000000 using CMP R3,R4 + BLO LOOP1 and stores result (e.g. 0x11111111) at 0x40000030; ends with SWI 0x11.\n" +
+          "- EXP 9 (STM32 LED Blinking): #define LED_PIN D2, toggles HIGH/LOW every 1000ms.\n" +
+          "- EXP 10 (STM32 7-Segment Display): Pins PA0..PA6, common-cathode digitPatterns[10][7], displays 0..9 with 1000ms delay.\n\n" +
+          "=== FULL LAB CODES ===\n" +
           labCode + "\n\n" +
           "RULES FOR YOUR RESPONSE:\n" +
           "1. IF THE STUDENT ASKS TO FIX, MODIFY, OR DEBUG AN EXPERIMENT CODE:\n" +
